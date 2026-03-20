@@ -32,33 +32,24 @@ MAP=pru_generic-pru1.map
 SOURCES=$(wildcard *.asm)
 OBJECTS=pru_generic.obj pru_stepphase.obj pru_wait.obj pru_stepdir.obj pru_deltasigma.obj pru_pwm.obj pru_encoder.obj pru_edgestepdir.obj
 
-ECHO = @echo
-INSTALL = install
-DESTDIR = /lib/firmware
-CC = gcc
-CCOPTS = -E
-SED = sed
-
-PRU_SRCS := $(wildcard *.p)
-
-all: pru_tasks.inc $(OBJECTS) $(TARGET)
+all: $(OBJECTS) $(TARGET)
 
 install: $(TARGET)
-	$(INSTALL) -m 0644 -o root -g root -t $(DESTDIR) $<
+	install -m 0644 -t $(TARGET_DIR)/lib/firmware $<
 
-%.obj: %.asm
-	@echo 'Invoking: PRU Compiler'
-	clpru --include_path=$(PRU_CGT)/include $(INCLUDE) $(CGT_CFLAGS) -al -fe $@ $<
+%.obj: %.asm pru_tasks.inc
+	echo 'Invoking: PRU Compiler'
+	$(PRU_CGT)/bin/clpru --include_path=$(PRU_CGT)/include $(CGT_CFLAGS) -al -fe $@ $<
 
 $(TARGET): $(OBJECTS) $(LINKER_COMMAND_FILE)
-	@echo ''
-	@echo 'Building target: $@'
-	clpru $(CGT_CFLAGS) -z -i$(PRU_CGT)/lib -i$(PRU_CGT)/include $(CGT_LFLAGS) -o $(TARGET) $(OBJECTS) -m$(MAP) $(LINKER_COMMAND_FILE)
-	@echo 'Finished building target: $@'
+	echo ''
+	echo 'Building target: $@'
+	$(PRU_CGT)/bin/clpru $(CGT_CFLAGS) -z -i$(PRU_CGT)/lib -i$(PRU_CGT)/include $(CGT_LFLAGS) -o $(TARGET) $(OBJECTS) -m$(MAP) $(LINKER_COMMAND_FILE)
+	echo 'Finished building target: $@'
 
 pru_tasks.inc: pru_tasks.h
-	$(ECHO) Create tasks include file $@
-	$(CC) $(CCOPTS) pru_tasks.h | $(SED) -e "s/^#/;/g" -e "s/^\s\+\([a-zA-Z]\)/\1/g" > $@
+	echo 'Create tasks include file $@'
+	$(CC) -E pru_tasks.h | sed -e "s/^#/;/g" -e "s/^\s\+\([a-zA-Z]\)/\1/g" > $@
 
 clean:
 	rm -f *.obj *.lst *.abs *.out pru_tasks.inc
