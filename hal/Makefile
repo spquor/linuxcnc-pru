@@ -1,7 +1,7 @@
 all: hal_modules
 
 install: hal_pru_generic.so
-	install -m 0644 -t $(TARGET_DIR)/usr/lib/linuxcnc/modules $<
+	install -m 0644 -t $(SYSROOT)/usr/lib/linuxcnc/modules $<
 
 hal_modules: hal_pru_generic.so
 
@@ -17,7 +17,7 @@ hal_pru_generic.so: hal_pru_generic.o stepgen.o encoder.o pwmgen.o
 
 %.o: %.c
 	echo Compiling realtime $<
-	$(CC) -o $@ -Os -g -I$(STAGING_DIR)/usr/include/linuxcnc -I. -I../asm -DRTAPI -fno-fast-math  -fno-unsafe-math-optimizations -DRTAPI -D_GNU_SOURCE -Drealtime -D__MODULE__ -Wframe-larger-than=2560 -c $<
+	$(CC) -o $@ -Os -g -I$(SYSROOT)/usr/include/linuxcnc -I. -I../asm -I$(HAL_INCLUDE) -DRTAPI -fno-fast-math -fno-unsafe-math-optimizations -DRTAPI -D_GNU_SOURCE -Drealtime -D__MODULE__ -c $<
 
 clean:
-	rm *.o
+	rm -f *.o *.tmp *.sym *.ver *.so

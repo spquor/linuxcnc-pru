@@ -35,11 +35,11 @@ OBJECTS=pru_generic.obj pru_stepphase.obj pru_wait.obj pru_stepdir.obj pru_delta
 all: $(OBJECTS) $(TARGET)
 
 install: $(TARGET)
-	install -m 0644 -t $(TARGET_DIR)/lib/firmware $<
+	install -m 0644 -t $(SYSROOT)/lib/firmware $<
 
 %.obj: %.asm pru_tasks.inc
 	echo 'Invoking: PRU Compiler'
-	$(PRU_CGT)/bin/clpru --include_path=$(PRU_CGT)/include $(CGT_CFLAGS) -al -fe $@ $<
+	$(PRU_CGT)/bin/clpru --include_path=$(PRU_CGT)/include $(ASM_INCLUDE) $(CGT_CFLAGS) -al -fe $@ $<
 
 $(TARGET): $(OBJECTS) $(LINKER_COMMAND_FILE)
 	echo ''
